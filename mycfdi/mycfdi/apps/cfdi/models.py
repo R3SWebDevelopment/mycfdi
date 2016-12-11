@@ -177,7 +177,7 @@ CDFI_DEFINITION = [
 
 class Base(models.Model):
     ###Internal Control########################################################
-    uuid = models.UUID(editable=False, null=False, blank=False, default=uuid.uuid4)
+    uuid = models.UUIDField(editable=False, null=False, blank=False, default=uuid.uuid4())
     active = models.NullBooleanField(default=True)
     valid = models.NullBooleanField(default=False)
     validation_feedback = models.TextField(default=None, null=True, blank=True)
@@ -305,8 +305,8 @@ class Impuesto(Base):
     total_impuestos_retenidos = models.DecimalField(default=None, max_digits=8, decimal_places=2)
     total_impuestos_trasladados = models.DecimalField(default=None, max_digits=8, decimal_places=2)
     ###ManyToMany##################################################################
-    retenidos_aduanera_relations = models.ManyToManyField('Retenidos')
-    trasladados_relations = models.ManyToManyField('Trasladado')
+    retenidos_relations = models.ManyToManyField('Retenidos', related_name='impuesto_retenidos')
+    trasladados_relations = models.ManyToManyField('Trasladado', related_name='impuesto_transladados')
 
 class Complemento(models.Model):
     ###String##################################################################
@@ -357,3 +357,35 @@ class CFDI(Base):
     impuestos_relations = models.ManyToManyField('Impuesto')
     complementos_relations = models.ManyToManyField('Complemento')
     addenda_relations = models.ManyToManyField('Addenda')
+
+class CFDIXML(models.Model):
+    processed = models.NullBooleanField(default=False)
+    xml_file = models.FileField(upload_to="cfdi/")
+    data = models.TextField(null=True, blank=True)
+    md5 = models.TextField(null=False, blank=False)
+    sha1 = models.TextField(null=False, blank=False)
+    ###ForeignKey##################################################################
+    cfdi = models.ForeignKey('CFDI', blank=True, null=True, related_name='xml')
+
+    @classmethod
+    def add(cls, file=None):
+        instance = None
+        md5, sha1 = hash_file(file=file)
+        if md5 is not None and sha1 is not None:
+            try:
+                md5 = "{0}".format(md5.hexdigest())
+                sha1 = "{0}".format(sha1.hexdigest())
+            except:
+                md5 = None
+                sha1 = None
+            if md5 is not None and md5.strip() and sha1 is not None and sha1.strip():
+                if not cls.objects.filter(md5__iexact=md5).filter(sha1__iexact=sha1).exists():
+                    instance = cls.objects.create(md5 = md5, sha1 = sha1)
+                    if instance is not None:
+                        try:
+                            instance.xml_file.save(file.name, file)
+                        except:
+                            pass
+                else:
+                    instance = cls.objects.filter(md5__iexact=md5).filter(sha1__iexact=sha1).first()
+        return instance

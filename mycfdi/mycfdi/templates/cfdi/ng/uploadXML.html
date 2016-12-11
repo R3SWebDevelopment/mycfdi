@@ -1,0 +1,17 @@
+{% load static %}
+
+<div class ="row" ng-controller="cfdiXMLUploadView">
+    <div>
+        <form action="" method="post">{% csrf_token %}
+        </form>
+
+        <input type="file" id="file" name="file" multiple onchange="angular.element(this).scope().getFileDetails(this)" accept="text/xml" max-uploads = 6/>
+        <input type="button" ng-click="uploadFiles()" value="Upload" />
+        <!--ADD A PROGRESS BAR ELEMENT.-->
+        <p><progress id="pro" value="0"></progress></p>
+    </div>
+</div>
+
+{% block EXTRA_SCRIPT %}
+<script src="{% static "js/ng/ng.js" %}"></script>
+{% endblock %}
