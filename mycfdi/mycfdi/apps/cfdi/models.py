@@ -1,203 +1,84 @@
 from django.db import models
 from utils import *
-import uuid
+from uuid import uuid4
+from bs4 import BeautifulSoup
+from shortuuidfield import ShortUUIDField
+from datetime import datetime
 
-CDFI_REQUIRED_FIELDS=[
-    'version', 'sello', 'forma_de_pago' , 'no_certificado', 'certificado', 'tipo_de_comprobante', 'metodo_de_pago', 'lugar_expedicion', 'fecha', 'fecha_folio_fiscal_orig', 'subtotal', 'total'
-]
-CDFI_DEFINITION = [
-    {
-        'name': 'version',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'serie',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': 25,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'folio',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': 20,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'sello',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'forma_de_pago',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'no_certificado',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': 20,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'certificado',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'condiciones_de_pago',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'motivo_descuento',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'tipo_cambio',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'metodo_de_pago',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'lugar_expedicion',
-        'class': 'str',
-        'required': True,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'num_cta_pago',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 4,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'folio_fiscal_orig',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'serie_folio_fiscal_orig',
-        'class': 'str',
-        'required': False,
-        'format': None,
-        'min': 1,
-        'max': None,
-        'collapse_ws': True,
-    },
-    {
-        'name': 'fecha',
-        'class': 'datetime',
-        'required': True,
-        'format': 'yyyy-mm-ddThh:mm:ss',
-    },
-    {
-        'name': 'fecha_folio_fiscal_orig',
-        'class': 'datetime',
-        'required': False,
-        'format': 'yyyy-mm-ddThh:mm:ss',
-    },
-    {
-        'name': 'subtotal',
-        'class': 'decimal',
-        'required': True,
-    },
-    {
-        'name': 'descuento',
-        'class': 'decimal',
-        'required': False,
-    },
-    {
-        'name': 'total',
-        'class': 'decimal',
-        'required': True,
-    },
-    {
-        'name': 'monto_folio_fiscal_orig',
-        'class': 'decimal',
-        'required': False,
-    },
-]
+CFDI_COMPROBANTE_DEFINITION=retrive_definition(component = 'json/cfdi/comprobante.json')
+CFDI_TIMBRE_FISCAL_DIGITAL_DEFINITION=retrive_definition(component = 'json/cfdi/timbre_fiscal_digital.json')
+CFDI_PERSONA_FISICAL_DEFINITION=retrive_definition(component ='json/cfdi/persona_fiscal.json')
+CFDI_DOMICILIO_DEFINITION=retrive_definition(component = 'json/cfdi/domicilio.json')
+CFDI_REGIMEN_FISCAL_DEFINITION=retrive_definition(component = 'json/cfdi/regimen_fiscal.json')
+CFDI_CONCEPTO_DEFINITION=retrive_definition(component = 'json/cfdi/concepto.json')
+CFDI_IMPUESTO_DEFINITION=retrive_definition(component = 'json/cfdi/impuesto.json')
+CFDI_TRASLADADO_DEFINITION=retrive_definition(component = 'json/cfdi/trasladado.json')
+CFDI_RETENIDO_DEFINITION=retrive_definition(component = 'json/cfdi/retenido.json')
 
 class Base(models.Model):
     ###Internal Control########################################################
-    uuid = models.UUIDField(editable=False, null=False, blank=False, default=uuid.uuid4())
+##    uuid = models.UUIDField(editable=False, null=False, blank=False, default=uuid4())
+    uuid = ShortUUIDField(max_length=255, db_index=False)
     active = models.NullBooleanField(default=True)
     valid = models.NullBooleanField(default=False)
     validation_feedback = models.TextField(default=None, null=True, blank=True)
     data = models.TextField(null=False, blank=False)
 
     @classmethod
-    def fields(cls):
-        fields = cls._meta.fields
+    def get_definition(cls):
+        return {}
+
+    @classmethod
+    def get_attributes(cls):
+        attributes = []
+        definition = cls.get_definition()
+        if definition is not None and definition.__class__ is dict:
+            if 'attributes' in definition.keys():
+                attributes = definition.get('attributes') or []
+        return attributes
+
+    @classmethod
+    def get_required_attributes(cls):
+        attributes = []
+        for attr in cls.get_attributes():
+            if 'required' in attr.keys() and attr.get('required') is True:
+                attributes.append(attr)
+        return attributes
+
+    @classmethod
+    def get_fields_keys(cls):
+        return [
+            {
+                'key' : attr.get('key') ,
+                'field': attr.get('name'),
+            } for attr in cls.get_attributes() if 'name' in attr.keys() and attr.get('name') is not None and 'key' in attr.keys() and attr.get('key') is not None
+        ]
+
+    @classmethod
+    def get_fields(cls):
+        fields = [ attr.get('name') for attr in cls.get_attributes() if 'name' in attr.keys() and attr.get('name') is not None ]
         return fields
 
     @classmethod
-    def required_fields(cls):
-        return CDFI_REQUIRED_FIELDS
+    def get_required_fields(cls):
+        fields = [ attr.get('name') for attr in cls.get_required_attributes() if 'name' in attr.keys() and attr.get('name') is not None ]
+        return fields
+
+    @classmethod
+    def get_keys(cls):
+        fields = [ attr.get('key') for attr in cls.get_attributes() if 'key' in attr.keys() and attr.get('key') is not None ]
+        return fields
+
+    @classmethod
+    def get_required_keys(cls):
+        fields = [ attr.get('key') for attr in cls.get_required_attributes() if 'key' in attr.keys() and attr.get('key') is not None ]
+        return fields
 
     @classmethod
     def is_required_field(cls, item):
-        if cls.has_field(item) and item in cls.required_fields():
+        if cls.has_field(item) and item in cls.get_required_fields():
             return True
         return False
-
 
     @classmethod
     def has_field(cls, key=None):
@@ -205,20 +86,59 @@ class Base(models.Model):
             return True
         return False
 
-    def __getattr__(self, item):
-        value = None
-        if self.__class__.has_field(key=item):
-            if item is 'version':
-                return self.version
-        return value
+    @classmethod
+    def fields(cls):
+        fields = cls._meta.fields
+        return fields
 
-    def __setattr__(self, key, value):
-        if self.__class__.has_field(key=key):
-            pass
+    @classmethod
+    def decode(cls, data = None):
+        d = {}
+        if data is not None:
+            for attr in cls.get_fields_keys():
+                key = attr.get('key') or None
+                field = attr.get('field') or None
+                if key is not None and key.strip() and field is not None and field.strip():
+                    value = None
+                    if data.has_attr(key):
+                        value = data.get(key) or None
+                    d.update({
+                        field : value
+                    })
+        return d
 
-class RegimenFiscal(models.Model):
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+    def push_attributes(self, attributes = {}):
+        if attributes is not None and attributes.__class__ is dict:
+            for key in attributes.keys():
+                value = attributes.get(key) or None
+                setattr(self, key, value)
+                self.save()
+
+class RegimenFiscal(Base):
     ###String##################################################################
     regimen = models.TextField(default=None, null=True, blank=True)
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_REGIMEN_FISCAL_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instance = None
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            regimen_fiscal = soup.find('REGIMENFISCAL')
+            if regimen_fiscal is not None:
+                attributes = cls.decode(data=regimen_fiscal)
+                instance = cls.objects.create()
+                if instance is not None:
+                    instance.push_attributes(attributes=attributes)
+        return instance
 
 class Domicilio(Base):
     ###String##################################################################
@@ -233,21 +153,111 @@ class Domicilio(Base):
     pais = models.TextField(default=None, null=True, blank=True)
     codigo_postal = models.TextField(default=None, null=True, blank=True)
 
+    @classmethod
+    def get_definition(cls):
+        return CFDI_DOMICILIO_DEFINITION or {}
+
+    @classmethod
+    def super_add(cls, data=None , tag = 'DOMICILIOFISCAL'):
+        instance = None
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            domicilio = soup.find(tag)
+            if domicilio is not None:
+                attributes = cls.decode(data=domicilio)
+                instance = cls.objects.create()
+                if instance:
+                    instance.push_attributes(attributes=attributes)
+        return instance
+
+    @classmethod
+    def add(cls, data=None):
+        return cls.super_add(data=data)
+
+class DomicilioFiscal(Domicilio):
+    pass
+
+    @classmethod
+    def add(cls, data=None):
+        return cls.super_add(data=data , tag='DOMICILIOFISCAL')
+
+class Expedido(Domicilio):
+    pass
+
+    @classmethod
+    def add(cls, data=None):
+        return cls.super_add(data=data , tag='EXPEDIDOEN')
+
 class PersonaFiscal(Base):
     ###String##################################################################
     rfc = models.TextField(default=None, null=True, blank=True)
     nombre = models.TextField(default=None, null=True, blank=True)
-    ###ForeignKey##################################################################
-    domicilio_relation = models.ForeignKey('Domicilio', blank=False, null=False, related_name='cfdi_domicilio')
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_PERSONA_FISICAL_DEFINITION or {}
+
+    @classmethod
+    def super_add(cls, data=None , tag = None):
+        instance = None
+        if data is not None and data.strip() and tag is not None and tag.strip():
+            soup = BeautifulSoup(data, 'xml')
+            emisor = soup.find(tag)
+            if emisor is not None:
+                attributes = cls.decode(data=emisor)
+                rfc = attributes.get('rfc') or None
+                if rfc is not None and rfc.strip():
+                    instance = cls.objects.create(rfc=rfc)
+                    if instance is not None:
+                        instance.push_attributes(attributes=attributes)
+                if instance is not None:
+                    domicilio = Domicilio.add(data=data)
+                    if domicilio is not None:
+                        instance.domicilio_relation = domicilio
+                        instance.save()
+        return instance
+
 
 class Receptor(PersonaFiscal):
-    pass
+    ###ForeignKey##################################################################
+    domicilio_relation = models.ForeignKey('Domicilio', blank=True, null=True, related_name='cfdi_domicilio')
+
+    @classmethod
+    def add(cls, data=None):
+        instance = cls.super_add(data=data, tag='RECEPTOR')
+        if instance is not None:
+            domicilio = Domicilio.add(data=data)
+            if domicilio is not None:
+                instance.domicilio_relation = domicilio
+                instance.save()
+        return instance
+
 
 class Emisor(PersonaFiscal):
     ###ForeignKey##################################################################
-    expedido_en_relation = models.ForeignKey('Domicilio', blank=False, null=False, related_name='cfdi_expedido')
+    expedido_en_relation = models.ForeignKey('Expedido', blank=True, null=True, related_name='cfdi_expedido')
     ###ManyToMany##################################################################
     regimen_fiscal_relations = models.ManyToManyField('RegimenFiscal')
+    ###ForeignKey##################################################################
+    domicilio_fiscal_relation = models.ForeignKey('DomicilioFiscal', blank=True, null=True, related_name='cfdi_domicilio_fiscal')
+
+    @classmethod
+    def add(cls, data=None):
+        instance = cls.super_add(data=data , tag = 'EMISOR')
+        if instance is not None:
+            expedido_en = Expedido.add(data=data)
+            if expedido_en is not None:
+                instance.expedido_en_relation = expedido_en
+                instance.save()
+            domicilio_fiscal = DomicilioFiscal.add(data=data)
+            if domicilio_fiscal is not None:
+                instance.domicilio_fiscal_relation = domicilio_fiscal
+                instance.save()
+            regimen_fiscal = RegimenFiscal.add(data=data)
+            if regimen_fiscal is not None:
+                instance.regimen_fiscal_relations.add(regimen_fiscal)
+                instance.save()
+        return instance
 
 class InformacionAduanera(Base):
     ###String##################################################################
@@ -278,41 +288,293 @@ class Concepto(Base):
     no_identificacion = models.TextField(default=None, null=True, blank=True)
     descripcion = models.TextField(default=None, null=True, blank=True)
     ###Decimal##################################################################
-    cantidad = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    valor_unitario = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    importe = models.DecimalField(default=None, max_digits=8, decimal_places=2)
+    cantidad = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    valor_unitario = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    importe = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
     ###ForeignKey##################################################################
-    predial_relation = models.ForeignKey('ConceptoPredial' , blank=False, null=False, related_name='concepto')
+    predial_relation = models.ForeignKey('ConceptoPredial' , blank=True, null=True, related_name='concepto')
     ###ManyToMany##################################################################
     informacion_aduanera_relations = models.ManyToManyField('InformacionAduanera')
     partes_relations = models.ManyToManyField('Parte')
     complementos_relations = models.ManyToManyField('Concepto')
 
+    @classmethod
+    def get_definition(cls):
+        return CFDI_CONCEPTO_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instances = []
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            conceptos = soup.findAll('CONCEPTO')
+            print "conceptos: %s" % conceptos
+            for concepto in conceptos:
+                attributes = cls.decode(data=concepto)
+                print "attributes: %s" % attributes
+                instance = cls.objects.create()
+                if instance is not None:
+                    instance.push_attributes(attributes=attributes)
+                    instances.append(instance)
+        return instances
+
 class ImpuestosAplicaciones(models.Model):
     ###Decimal##################################################################
-    impuesto = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    importe = models.DecimalField(default=None, max_digits=8, decimal_places=2)
+    impuesto = models.TextField(default=None, null=True, blank=True)
+    importe = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+
+    @classmethod
+    def get_definition(cls):
+        return {}
+
+    @classmethod
+    def get_attributes(cls):
+        attributes = []
+        definition = cls.get_definition()
+        if definition is not None and definition.__class__ is dict:
+            if 'attributes' in definition.keys():
+                attributes = definition.get('attributes') or []
+        return attributes
+
+    @classmethod
+    def get_required_attributes(cls):
+        attributes = []
+        for attr in cls.get_attributes():
+            if 'required' in attr.keys() and attr.get('required') is True:
+                attributes.append(attr)
+        return attributes
+
+    @classmethod
+    def get_fields_keys(cls):
+        return [
+            {
+                'key': attr.get('key'),
+                'field': attr.get('name'),
+            } for attr in cls.get_attributes() if
+            'name' in attr.keys() and attr.get('name') is not None and 'key' in attr.keys() and attr.get('key') is not None
+            ]
+
+    @classmethod
+    def get_fields(cls):
+        fields = [attr.get('name') for attr in cls.get_attributes() if
+                  'name' in attr.keys() and attr.get('name') is not None]
+        return fields
+
+    @classmethod
+    def get_required_fields(cls):
+        fields = [attr.get('name') for attr in cls.get_required_attributes() if
+                  'name' in attr.keys() and attr.get('name') is not None]
+        return fields
+
+    @classmethod
+    def get_keys(cls):
+        fields = [attr.get('key') for attr in cls.get_attributes() if 'key' in attr.keys() and attr.get('key') is not None]
+        return fields
+
+    @classmethod
+    def get_required_keys(cls):
+        fields = [attr.get('key') for attr in cls.get_required_attributes() if
+                  'key' in attr.keys() and attr.get('key') is not None]
+        return fields
+
+    @classmethod
+    def is_required_field(cls, item):
+        if cls.has_field(item) and item in cls.get_required_fields():
+            return True
+        return False
+
+    @classmethod
+    def has_field(cls, key=None):
+        if key is not None and key in cls.fields():
+            return True
+        return False
+
+    @classmethod
+    def fields(cls):
+        fields = cls._meta.fields
+        return fields
+
+    @classmethod
+    def decode(cls, data=None):
+        d = {}
+        if data is not None:
+            for attr in cls.get_fields_keys():
+                key = attr.get('key') or None
+                field = attr.get('field') or None
+                if key is not None and key.strip() and field is not None and field.strip():
+                    value = None
+                    if data.has_attr(key):
+                        value = data.get(key) or None
+                    d.update({
+                        field: value
+                    })
+        return d
+
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+########################################################################################################################
+
+    def push_attributes(self, attributes = {}):
+        if attributes is not None and attributes.__class__ is dict:
+            for key in attributes.keys():
+                value = attributes.get(key) or None
+                setattr(self, key, value)
+                self.save()
 
 class Retenidos(ImpuestosAplicaciones):
     pass
 
+    @classmethod
+    def get_definition(cls):
+        return CFDI_RETENIDO_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instances = []
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            retenidos = soup.find('RETENIDOS')
+            print "retenidos: %s" % retenidos
+            if retenidos is not None:
+                for retenido in retenidos.find_all('RETENIDO'):
+                    instance = cls.objects.create()
+                    if instance is not None:
+                        attributes = cls.decode(data=retenido)
+                        instance.push_attributes(attributes=attributes)
+                        instances.append(instance)
+        return instances
+
 class Trasladado(ImpuestosAplicaciones):
     ###Decimal##################################################################
-    tasa = models.DecimalField(default=None, max_digits=8, decimal_places=2)
+    tasa = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_TRASLADADO_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instances = []
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            traslados = soup.find('TRASLADOS')
+            print "traslados: %s" % traslados
+            if traslados is not None:
+                for traslado in traslados.find_all('TRASLADO'):
+                    instance = cls.objects.create()
+                    if instance is not None:
+                        attributes = cls.decode(data=traslado)
+                        instance.push_attributes(attributes=attributes)
+                        instances.append(instance)
+        return instances
 
 class Impuesto(Base):
     ###Decimal##################################################################
-    total_impuestos_retenidos = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    total_impuestos_trasladados = models.DecimalField(default=None, max_digits=8, decimal_places=2)
+    total_impuestos_retenidos = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    total_impuestos_trasladados = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
     ###ManyToMany##################################################################
     retenidos_relations = models.ManyToManyField('Retenidos', related_name='impuesto_retenidos')
     trasladados_relations = models.ManyToManyField('Trasladado', related_name='impuesto_transladados')
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_IMPUESTO_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instance = None
+        if data is not None and data.strip():
+            instance = cls.objects.create()
+            if instance is not None:
+                soup = BeautifulSoup(data, 'xml')
+                impuestos = soup.find('IMPUESTOS')
+                print "impuestos: %s" % impuestos
+                if impuestos is not None:
+                    attributes = cls.decode(data=impuestos)
+                    instance.push_attributes(attributes=attributes)
+                    trasladados = Trasladado.add(data = data)
+                    for trasladado in trasladados:
+                        instance.trasladados_relations.add(trasladado)
+                    retenidos = Retenidos.add(data=data)
+                    for retenido in retenidos:
+                        instance.retenidos_relations.add(retenido)
+                    instance.figure_retenidos
+                    instance.figure_trasladados
+        return instance
+
+    def _figure_retenidos(self):
+        retenidos = 0.00
+        for trasladado in self.trasladados_relations.all():
+            importe = trasladado.importe
+            if importe is None:
+                try:
+                    importe = float(importe)
+                except:
+                    importe = 0.00
+            retenidos = float(retenidos) +  float(importe)
+        self.total_impuestos_trasladados = retenidos
+        self.save()
+    figure_retenidos = property(_figure_retenidos)
+
+
+    def _figure_trasladados(self):
+        trasladados = 0.00
+        for retenido in self.retenidos_relations.all():
+            importe = retenido.importe
+            if importe is None:
+                try:
+                    importe = float(importe)
+                except:
+                    importe = 0.00
+            trasladados = float(trasladados) + float(importe)
+        self.total_impuestos_retenidos = trasladados
+        self.save()
+    figure_trasladados = property(_figure_trasladados)
 
 class Complemento(models.Model):
     ###String##################################################################
     lead = models.TextField(default=None, null=True, blank=True)
     key = models.TextField(default=None, null=True, blank=True)
     value = models.TextField(default=None, null=True, blank=True)
+
+class TimbreFiscalDigital(Base):
+    sello_cfd = models.TextField(default=None, null=True, blank=True)
+    cfd_uuid = models.TextField(default=None, null=True, blank=True)
+    tfd = models.TextField(default=None, null=True, blank=True)
+    sello_sat = models.TextField(default=None, null=True, blank=True)
+    version = models.TextField(default=None, null=True, blank=True)
+    schema_location = models.TextField(default=None, null=True, blank=True)
+    xsi = models.TextField(default=None, null=True, blank=True)
+    no_certificado_sat = models.TextField(default=None, null=True, blank=True)
+    ###DateTime##################################################################
+    fecha_timbrado = models.DateTimeField(default=None, null=True, blank=True)
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_TIMBRE_FISCAL_DIGITAL_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instance = None
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            complemento = soup.find('COMPLEMENTO')
+            if complemento is not None:
+                timbre_fiscal_digital = complemento.find('TIMBREFISCALDIGITAL')
+                if timbre_fiscal_digital is not None:
+                    attributes = cls.decode(data=timbre_fiscal_digital)
+                    cfd_uuid = attributes.get('cfd_uuid') or None
+                    fecha_timbrado = attributes.get('fecha_timbrado') or None
+                    try:
+                        fecha_timbrado = datetime.strptime(fecha_timbrado, '%Y-%m-%dT%H:%M:%S')
+                    except:
+                        fecha_timbrado = None
+                    if cfd_uuid is not None and cfd_uuid.strip() and fecha_timbrado is not None:
+                        instance, created = cls.objects.get_or_create(cfd_uuid = cfd_uuid , fecha_timbrado = fecha_timbrado)
+                        if instance is not None and created is True:
+                            instance.push_attributes(attributes = attributes)
+        return instance
 
 class Addenda(models.Model):
     ###String##################################################################
@@ -343,20 +605,48 @@ class CFDI(Base):
     fecha = models.DateTimeField(default=None, null=True, blank=True)
     fecha_folio_fiscal_orig = models.DateTimeField(default=None, null=True, blank=True)
     ###Decimal##################################################################
-    subtotal = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    descuento = models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    total= models.DecimalField(default=None, max_digits=8, decimal_places=2)
-    monto_folio_fiscal_orig = models.DecimalField(default=None, max_digits=8, decimal_places=2)
+    subtotal = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    descuento = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    total= models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+    monto_folio_fiscal_orig = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
     ###ForeignKey##################################################################
-    emisor_relation = models.ForeignKey('Emisor' , blank=False, null=False, related_name='cfdi_emitidas')
-    receptor_relation = models.ForeignKey('Receptor' , blank=False, null=False, related_name='cfdi_recibidas')
+    emisor_relation = models.ForeignKey('Emisor' , blank=True, null=True, related_name='cfdi_emitidas')
+    receptor_relation = models.ForeignKey('Receptor' , blank=True, null=True, related_name='cfdi_recibidas')
+    complemento_relation = models.ForeignKey('Complemento', blank=True, null=True, related_name='cfdi_complemento')
+    timbre_fiscal_digital_relation = models.ForeignKey('TimbreFiscalDigital', blank=True, null=True, related_name='cfdi_timbre_fiscal')
 #    complemento_relation = models.ForeignKey('Complemento' , blank=False, null=False, related_name='cfdi_complemento')
 #    addenda_relation = models.ForeignKey('Addenda' , blank=False, null=False, related_name='cfdi_addenda')
     ###ManyToMany##################################################################
     conceptos_relations = models.ManyToManyField('Concepto')
     impuestos_relations = models.ManyToManyField('Impuesto')
-    complementos_relations = models.ManyToManyField('Complemento')
+#    complementos_relations = models.ManyToManyField('Complemento')
     addenda_relations = models.ManyToManyField('Addenda')
+
+    @classmethod
+    def get_definition(cls):
+        return CFDI_COMPROBANTE_DEFINITION or {}
+
+    @classmethod
+    def add(cls, data=None):
+        instance = None
+        if data is not None and data.strip():
+            soup = BeautifulSoup(data, 'xml')
+            comprobante = soup.find('COMPROBANTE')
+            if comprobante is not None:
+                attributes = cls.decode(data=comprobante)
+            timbre_fiscal_digital = TimbreFiscalDigital.add(data = data)
+            emisor = Emisor.add(data=data)
+            receptor = Receptor.add(data=data)
+            if timbre_fiscal_digital is not None and emisor is not None and receptor is not None:
+                instance , created = cls.objects.get_or_create(timbre_fiscal_digital_relation = timbre_fiscal_digital , emisor_relation = emisor , receptor_relation = receptor)
+                if instance is not None and created is True:
+                    instance.push_attributes(attributes=attributes)
+                    conceptos = Concepto.add(data = data)
+                    for concepto in conceptos:
+                        instance.conceptos_relations.add(concepto)
+                    impuesto = Impuesto.add(data=data)
+                    instance.impuestos_relations.add(impuesto)
+        return instance
 
 class CFDIXML(models.Model):
     processed = models.NullBooleanField(default=False)
@@ -389,3 +679,42 @@ class CFDIXML(models.Model):
                 else:
                     instance = cls.objects.filter(md5__iexact=md5).filter(sha1__iexact=sha1).first()
         return instance
+
+    @classmethod
+    def do_process(cls):
+        while cls.objects.filter(processed = False).filter(data__isnull = True).filter(cfdi__isnull = True).exists():
+            instance = cls.objects.filter(processed = False).filter(data__isnull = True).filter(cfdi__isnull = True).first()
+            if instance is not None:
+                if instance.xml_file is not None:
+                    try:
+                        instance.xml_file.open()
+                        data = instance.xml_file.read()
+                        instance.xml_file.close()
+                    except:
+                        data = None
+                    if data is not None:
+                        data = data.upper()
+                        instance.data = data
+                        instance.save()
+                        instance.fix_encode
+                        instance.parse
+
+    @property
+    def fix_encode(self):
+        try:
+            data = self.data
+            data = data.encode('utf-8')
+            data = data.decode('utf-8-sig')
+            self.data = data
+            self.save()
+        except:
+            pass
+
+    @property
+    def parse(self):
+        if self.cfdi is None and self.data is not None and self.data.strip():
+            instance = CFDI.add(self.data)
+            if instance is not None:
+                self.cfdi = instance
+                self.processed = True
+                self.save()

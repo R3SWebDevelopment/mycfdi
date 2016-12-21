@@ -1,0 +1,64 @@
+{
+  "attributes":[
+    {
+        "key": "CANTIDAD",
+        "name": "cantidad",
+        "class": "float",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "DESCRIPCION",
+        "name": "descripcion",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "IMPORTE",
+        "name": "importe",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "UNIDAD",
+        "name": "unidad",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "VALORUNITARIO",
+        "name": "valor_unitario",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NOIDENTIFICACION",
+        "name": "no_identificacion",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    }
+  ]
+}

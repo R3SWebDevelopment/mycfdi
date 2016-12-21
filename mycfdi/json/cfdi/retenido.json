@@ -1,0 +1,24 @@
+{
+  "attributes":[
+    {
+        "key": "IMPUESTO",
+        "name": "impuesto",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "IMPORTE",
+        "name": "importe",
+        "class": "float",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    }
+  ]
+}

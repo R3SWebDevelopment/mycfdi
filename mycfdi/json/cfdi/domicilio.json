@@ -1,0 +1,104 @@
+{
+  "attributes":[
+    {
+        "key": "CALLE",
+        "name": "calle",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "CODIGOPOSTAL",
+        "name": "codigo_postal",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "PAIS",
+        "name": "pais",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "COLONIA",
+        "name": "colonia",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NOEXTERIOR",
+        "name": "no_exterior",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NOINTERIOR",
+        "name": "no_interior",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "ESTADO",
+        "name": "estado",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "MUNICIPIO",
+        "name": "municipio",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "REFERENCIA",
+        "name": "referencia",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "LOCALIDAD",
+        "name": "localidad",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    }
+  ]
+}

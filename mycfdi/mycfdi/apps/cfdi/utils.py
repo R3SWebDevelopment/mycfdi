@@ -1,6 +1,7 @@
 import sys
 import hashlib
 from django.core.files.uploadedfile import InMemoryUploadedFile
+import json
 
 def collapse_white_spaces(value=None):
     value_retorned = None
@@ -34,3 +35,16 @@ def hash_file(file=None):
                 print "e: %s" % e
     #            pass
     return md5, sha1
+
+def retrive_definition(component = None):
+    print "retrive_definition -> component: %s" % component
+    definition = {}
+    if component is not None and component.strip():
+        try:
+            with open(component) as f:
+                data = f.read()
+                definition = json.loads(data)
+        except Exception,e:
+            print "retrive_definition -> Exception: %s" % e
+            pass
+    return definition

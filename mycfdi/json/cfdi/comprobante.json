@@ -1,0 +1,190 @@
+{
+  "attributes":[
+   {
+        "key": "VERSION",
+        "name": "version",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "SERIE",
+        "name": "serie",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": 25,
+        "collapse_ws": true
+    },
+    {
+        "key": "FOLIO",
+        "name": "folio",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": 20,
+        "collapse_ws": true
+    },
+    {
+        "key": "SELLO",
+        "name": "sello",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "FORMADEPAGO",
+        "name": "forma_de_pago",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NOCERTIFICADO",
+        "name": "no_certificado",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": 20,
+        "collapse_ws": true
+    },
+    {
+        "key": "CERTIFICADO",
+        "name": "certificado",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "CONDICIONESDEPAGO",
+        "name": "condiciones_de_pago",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "name": "SUBTOTAL",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "name": "TIPOCAMBIO",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "METODODEPAGO",
+        "name": "metodo_de_pago",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "LUGAREXPEDICION",
+        "name": "lugar_expedicion",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NUMCTAPAGO",
+        "name": "num_cta_pago",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 4,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "FOLIOFISCALORIG",
+        "name": "folio_fiscal_orig",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "SERIEFOLIOFISCALORIG",
+        "name": "serie_folio_fiscal_orig",
+        "class": "str",
+        "required": false,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "FECHA",
+        "name": "fecha",
+        "class": "datetime",
+        "required": true,
+        "format": "yyyy-mm-ddThh:mm:ss"
+    },
+    {
+        "key": "FECHAFOLIOFISCALORIG",
+        "name": "fecha_folio_fiscal_orig",
+        "class": "datetime",
+        "required": false,
+        "format": "yyyy-mm-ddThh:mm:ss"
+    },
+    {
+        "key": "SUBTOTAL",
+        "name": "subtotal",
+        "class": "decimal",
+        "required": true
+    },
+    {
+        "key": "DESCUENTO",
+        "name": "descuento",
+        "class": "decimal",
+        "required": false
+    },
+    {
+        "key": "TOTAL",
+        "name": "total",
+        "class": "decimal",
+        "required": true
+    },
+    {
+        "key": "MONTOFOLIOFISCALORIG",
+        "name": "monto_folio_fiscal_orig",
+        "class": "decimal",
+        "required": false
+    }
+  ]
+}

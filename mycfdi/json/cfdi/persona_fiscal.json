@@ -1,0 +1,24 @@
+{
+  "attributes":[
+    {
+        "key": "NOMBRE",
+        "name": "nombre",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "RFC",
+        "name": "rfc",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    }
+  ]
+}

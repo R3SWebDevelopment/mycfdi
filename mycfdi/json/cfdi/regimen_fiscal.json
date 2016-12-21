@@ -1,0 +1,14 @@
+{
+  "attributes":[
+    {
+        "key": "REGIMEN",
+        "name": "regimen",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    }
+  ]
+}

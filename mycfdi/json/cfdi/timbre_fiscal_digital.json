@@ -1,0 +1,91 @@
+{
+  "attributes":[
+    {
+        "key": "SELLOCFD",
+        "name": "sello_cfd",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "UUID",
+        "name": "cfd_uuid",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "TFD",
+        "name": "tfd",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "SELLOSAT",
+        "name": "sello_sat",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "VERSION",
+        "name": "version",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "SCHEMALOCATION",
+        "name": "schema_location",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "XSI",
+        "name": "xsi",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "NOCERTIFICADOSAT",
+        "name": "no_certificado_sat",
+        "class": "str",
+        "required": true,
+        "format": null,
+        "min": 1,
+        "max": null,
+        "collapse_ws": true
+    },
+    {
+        "key": "FECHATIMBRADO",
+        "name": "fecha_timbrado",
+        "class": "datetime",
+        "required": true,
+        "format": "yyyy-mm-ddThh:mm:ss"
+    }
+  ]
+}
