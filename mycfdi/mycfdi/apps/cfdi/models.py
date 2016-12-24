@@ -5,6 +5,7 @@ from bs4 import BeautifulSoup
 from shortuuidfield import ShortUUIDField
 from datetime import datetime
 
+
 CFDI_COMPROBANTE_DEFINITION=retrive_definition(component = 'json/cfdi/comprobante.json')
 CFDI_TIMBRE_FISCAL_DIGITAL_DEFINITION=retrive_definition(component = 'json/cfdi/timbre_fiscal_digital.json')
 CFDI_PERSONA_FISICAL_DEFINITION=retrive_definition(component ='json/cfdi/persona_fiscal.json')
@@ -119,6 +120,41 @@ class Base(models.Model):
                 setattr(self, key, value)
                 self.save()
 
+    @classmethod
+    def get_serializer(cls):
+        return None
+
+    @classmethod
+    def filtering(cls, data=None , filtering={}):
+
+        return data
+
+    @classmethod
+    def rest_list(cls, **kwargs):
+        rest_list = []
+        serialiser = cls.get_serializer()
+        if serialiser is not None:
+            if 'filtering' in kwargs.keys():
+                filtering = kwargs.get('filtering') or {}
+            else:
+                filtering = {}
+            if 'data' in kwargs.keys():
+                data = kwargs.get('data') or None
+            if data is None:
+                data = cls.objects.all()
+            data = cls.filtering(data = data , filtering=filtering)
+            serialized = serialiser(data, many=True)
+            rest_list = serialized.data or None
+        return rest_list
+
+    @property
+    def rest_data(self):
+        serialiser = self.__class__.get_serializer()
+        if serialiser is not None:
+            serialized = serialiser(self)
+            return serialized.data or None
+        return None
+
 class RegimenFiscal(Base):
     ###String##################################################################
     regimen = models.TextField(default=None, null=True, blank=True)
@@ -152,6 +188,11 @@ class Domicilio(Base):
     estado = models.TextField(default=None, null=True, blank=True)
     pais = models.TextField(default=None, null=True, blank=True)
     codigo_postal = models.TextField(default=None, null=True, blank=True)
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import DomicilioSerializer
+        return DomicilioSerializer
 
     @classmethod
     def get_definition(cls):
@@ -194,6 +235,18 @@ class PersonaFiscal(Base):
     nombre = models.TextField(default=None, null=True, blank=True)
 
     @classmethod
+    def get_serializer(cls):
+        return None
+
+    @property
+    def rest_data(self):
+        serialiser = self.__class__.get_serializer()
+        if serialiser is not None:
+            serialized = serialiser(self)
+            return serialized.data or None
+        return None
+
+    @classmethod
     def get_definition(cls):
         return CFDI_PERSONA_FISICAL_DEFINITION or {}
 
@@ -223,6 +276,18 @@ class Receptor(PersonaFiscal):
     domicilio_relation = models.ForeignKey('Domicilio', blank=True, null=True, related_name='cfdi_domicilio')
 
     @classmethod
+    def get_serializer(cls):
+        from serializers import ReceptorSerializer
+        return ReceptorSerializer
+
+    @property
+    def domicilio(self):
+        domicilio = None
+        if self.domicilio_relation is not None:
+            domicilio = self.domicilio_relation.rest_data
+        return domicilio
+
+    @classmethod
     def add(cls, data=None):
         instance = cls.super_add(data=data, tag='RECEPTOR')
         if instance is not None:
@@ -240,6 +305,32 @@ class Emisor(PersonaFiscal):
     regimen_fiscal_relations = models.ManyToManyField('RegimenFiscal')
     ###ForeignKey##################################################################
     domicilio_fiscal_relation = models.ForeignKey('DomicilioFiscal', blank=True, null=True, related_name='cfdi_domicilio_fiscal')
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import EmisorSerializer
+        return EmisorSerializer
+
+    @property
+    def domicilio_fiscal(self):
+        domicilio_fiscal = None
+        if self.domicilio_fiscal_relation is not None:
+            domicilio_fiscal = self.domicilio_fiscal_relation.rest_data
+        return domicilio_fiscal
+
+    @property
+    def regimen_fiscal(self):
+        regimen_fiscal = None
+        if self.regimen_fiscal_relations is not None:
+            regimen_fiscal = self.regimen_fiscal_relations.rest_data
+        return regimen_fiscal
+
+    @property
+    def expedido_en(self):
+        expedido_en = None
+        if self.expedido_en_relation is not None:
+            expedido_en = self.expedido_en_relation.rest_data
+        return expedido_en
 
     @classmethod
     def add(cls, data=None):
@@ -297,6 +388,11 @@ class Concepto(Base):
     informacion_aduanera_relations = models.ManyToManyField('InformacionAduanera')
     partes_relations = models.ManyToManyField('Parte')
     complementos_relations = models.ManyToManyField('Concepto')
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import ConceptoSerializer
+        return ConceptoSerializer
 
     @classmethod
     def get_definition(cls):
@@ -410,6 +506,41 @@ class ImpuestosAplicaciones(models.Model):
                     })
         return d
 
+    @classmethod
+    def get_serializer(cls):
+        return None
+
+    @classmethod
+    def filtering(cls, data=None , filtering={}):
+
+        return data
+
+    @classmethod
+    def rest_list(cls, **kwargs):
+        rest_list = []
+        serialiser = cls.get_serializer()
+        if serialiser is not None:
+            if 'filtering' in kwargs.keys():
+                filtering = kwargs.get('filtering') or {}
+            else:
+                filtering = {}
+            if 'data' in kwargs.keys():
+                data = kwargs.get('data') or None
+            if data is None:
+                data = cls.objects.all()
+            data = cls.filtering(data = data , filtering=filtering)
+            serialized = serialiser(data, many=True)
+            rest_list = serialized.data or None
+        return rest_list
+
+    @property
+    def rest_data(self):
+        serialiser = self.__class__.get_serializer()
+        if serialiser is not None:
+            serialized = serialiser(self)
+            return serialized.data or None
+        return None
+
 ########################################################################################################################
 ########################################################################################################################
 ########################################################################################################################
@@ -424,6 +555,11 @@ class ImpuestosAplicaciones(models.Model):
 
 class Retenidos(ImpuestosAplicaciones):
     pass
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import RetenidosSerializer
+        return RetenidosSerializer
 
     @classmethod
     def get_definition(cls):
@@ -448,6 +584,11 @@ class Retenidos(ImpuestosAplicaciones):
 class Trasladado(ImpuestosAplicaciones):
     ###Decimal##################################################################
     tasa = models.DecimalField(default=None, null=True, blank=True, max_digits=8, decimal_places=2)
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import TrasladadoSerializer
+        return TrasladadoSerializer
 
     @classmethod
     def get_definition(cls):
@@ -476,6 +617,25 @@ class Impuesto(Base):
     ###ManyToMany##################################################################
     retenidos_relations = models.ManyToManyField('Retenidos', related_name='impuesto_retenidos')
     trasladados_relations = models.ManyToManyField('Trasladado', related_name='impuesto_transladados')
+
+    @classmethod
+    def get_serializer(cls):
+        from serializers import ImpuestoSerializer
+        return ImpuestoSerializer
+
+    @property
+    def retenidos(self):
+        retenidos = None
+        if self.retenidos_relations is not None:
+            retenidos = Retenidos.rest_list(data=self.retenidos_relations.all())
+        return retenidos
+
+    @property
+    def trasladados(self):
+        trasladados = None
+        if self.trasladados_relations is not None:
+            trasladados = Trasladado.rest_list(data=self.trasladados_relations.all())
+        return trasladados
 
     @classmethod
     def get_definition(cls):
@@ -550,6 +710,10 @@ class TimbreFiscalDigital(Base):
     ###DateTime##################################################################
     fecha_timbrado = models.DateTimeField(default=None, null=True, blank=True)
 
+    @property
+    def folio_fiscal(self):
+        return self.cfd_uuid or None
+
     @classmethod
     def get_definition(cls):
         return CFDI_TIMBRE_FISCAL_DIGITAL_DEFINITION or {}
@@ -623,6 +787,11 @@ class CFDI(Base):
     addenda_relations = models.ManyToManyField('Addenda')
 
     @classmethod
+    def get_serializer(cls):
+        from serializers import CFDISerializer
+        return CFDISerializer
+
+    @classmethod
     def get_definition(cls):
         return CFDI_COMPROBANTE_DEFINITION or {}
 
@@ -647,6 +816,84 @@ class CFDI(Base):
                     impuesto = Impuesto.add(data=data)
                     instance.impuestos_relations.add(impuesto)
         return instance
+
+    @property
+    def impuestos(self):
+        impuestos = None
+        if self.impuestos_relations is not None:
+            impuestos = Impuesto.rest_list(data=self.impuestos_relations.all())
+        return impuestos
+
+    @property
+    def conceptos(self):
+        conceptos = None
+        if self.conceptos_relations is not None:
+            conceptos = Concepto.rest_list(data=self.conceptos_relations.all())
+        return conceptos
+
+    @property
+    def fecha_json(self):
+        fecha = None
+        if self.fecha is not None:
+            fecha = self.fecha.isoformat()
+        return fecha
+
+    @property
+    def emisor(self):
+        json = None
+        if self.emisor_relation is not None:
+            json = self.emisor_relation.rest_data
+        return json
+
+    @property
+    def receptor(self):
+        json = None
+        if self.receptor_relation is not None:
+            json = self.receptor_relation.rest_data
+        return json
+
+    @property
+    def folio_fiscal(self):
+        folio_fiscal = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            folio_fiscal = self.timbre_fiscal_digital_relation.folio_fiscal or ""
+        return folio_fiscal
+
+    @property
+    def sello_cfd(self):
+        sello_cfd = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            sello_cfd = self.timbre_fiscal_digital_relation.sello_cfd or ""
+        return sello_cfd
+
+    @property
+    def tfd(self):
+        sello_cfd = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            sello_cfd = self.timbre_fiscal_digital_relation.sello_cfd or ""
+        return sello_cfd
+
+    @property
+    def sello_sat(self):
+        sello_sat = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            sello_sat = self.timbre_fiscal_digital_relation.sello_sat or ""
+        return sello_sat
+
+    @property
+    def xsi(self):
+        xsi = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            sello_sat = self.timbre_fiscal_digital_relation.xsi or ""
+        return xsi
+
+    @property
+    def fecha_timbrado(self):
+        fecha_timbrado = ""
+        if self.timbre_fiscal_digital_relation is not None:
+            fecha_timbrado = self.timbre_fiscal_digital_relation.fecha_timbrado or ""
+            fecha_timbrado = fecha_timbrado.isoformat()
+        return fecha_timbrado
 
 class CFDIXML(models.Model):
     processed = models.NullBooleanField(default=False)

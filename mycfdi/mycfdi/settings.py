@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mycfdi.apps.cfdi',
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

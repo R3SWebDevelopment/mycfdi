@@ -19,3 +19,14 @@ def upload_xml_cfdi(request):
         instance = CFDIXML.add(file=file)
         print "instance: %s" % instance
     return{}
+
+@REST(template="")
+def cfdi_view(request , uuid=None):
+    json_data = None
+    if uuid is not None and uuid.strip():
+        cfdi = CFDI.objects.filter(uuid = uuid).first()
+        if cfdi is not None:
+            json_data = cfdi.rest_data
+    return{
+        'response_data' : json_data,
+    }
