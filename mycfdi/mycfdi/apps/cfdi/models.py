@@ -974,6 +974,18 @@ class CFDIXML(models.Model):
             pass
 
     @property
+    def status(self):
+        return True
+
+    @property
+    def file_name(self):
+        name = None
+        if self.xml_file is not None:
+            name = self.xml_file.name
+        return name
+
+
+    @property
     def parse(self):
         if self.cfdi is None and self.data is not None and self.data.strip():
             instance = CFDI.add(self.data)
