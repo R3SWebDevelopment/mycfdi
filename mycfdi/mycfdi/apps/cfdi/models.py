@@ -947,6 +947,22 @@ class CFDIXML(models.Model):
                         instance.parse
 
     @property
+    def process(self):
+        if self.xml_file is not None:
+            try:
+                self.xml_file.open()
+                data = self.xml_file.read()
+                self.xml_file.close()
+            except:
+                data = None
+            if data is not None:
+                data = data.upper()
+                self.data = data
+                self.save()
+                self.fix_encode
+                self.parse
+
+    @property
     def fix_encode(self):
         try:
             data = self.data
