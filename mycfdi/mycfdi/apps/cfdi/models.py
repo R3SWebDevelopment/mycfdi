@@ -786,6 +786,9 @@ class CFDI(Base):
 #    complementos_relations = models.ManyToManyField('Complemento')
     addenda_relations = models.ManyToManyField('Addenda')
 
+    class Meta:
+        ordering : ['fecha']
+
     @classmethod
     def get_serializer(cls):
         from serializers import CFDISerializer
