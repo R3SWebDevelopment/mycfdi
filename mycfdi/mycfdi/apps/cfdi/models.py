@@ -787,7 +787,7 @@ class CFDI(Base):
     addenda_relations = models.ManyToManyField('Addenda')
 
     class Meta:
-        ordering : ['fecha']
+        ordering = ['fecha']
 
     @classmethod
     def get_serializer(cls):
