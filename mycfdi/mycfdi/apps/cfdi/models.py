@@ -849,11 +849,27 @@ class CFDI(Base):
         return json
 
     @property
+    def emisor_rfc(self):
+        json = self.emisor
+        rfc = None
+        if json is not None and 'rfc' in json.keys():
+            rfc = json.get('rfc') or None
+        return rfc
+
+    @property
     def receptor(self):
         json = None
         if self.receptor_relation is not None:
             json = self.receptor_relation.rest_data
         return json
+
+    @property
+    def receptor_rfc(self):
+        json = self.receptor
+        rfc = None
+        if json is not None and 'rfc' in json.keys():
+            rfc = json.get('rfc') or None
+        return rfc
 
     @property
     def folio_fiscal(self):
