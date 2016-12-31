@@ -946,6 +946,11 @@ class CFDIXML(models.Model):
                         instance.fix_encode
                         instance.parse
 
+    @classmethod
+    def cfdi_list(cls):
+        data_list = CFDI.objects.all()
+        return data_list
+
     @property
     def process(self):
         if self.xml_file is not None:
