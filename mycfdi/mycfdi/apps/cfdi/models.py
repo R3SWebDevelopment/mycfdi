@@ -4,6 +4,7 @@ from uuid import uuid4
 from bs4 import BeautifulSoup
 from shortuuidfield import ShortUUIDField
 from datetime import datetime
+from django.db.models import Count, Min, Sum, Avg
 
 
 CFDI_COMPROBANTE_DEFINITION=retrive_definition(component = 'json/cfdi/comprobante.json')
@@ -819,6 +820,18 @@ class CFDI(Base):
                     impuesto = Impuesto.add(data=data)
                     instance.impuestos_relations.add(impuesto)
         return instance
+
+    @property
+    def IVA_TRASLADADO(self):
+        IVA = None
+        if self.impuestos_relations is not None:
+            impuestos = self.impuestos_relations.filter(trasladados_relations__impuesto__iexact = 'iva').annotate(total_iva= Sum('trasladados_relations__importe')).values('total_iva')
+            for impuesto in impuestos:
+                if IVA is None:
+                    IVA = impuesto.get('total_iva')
+                else:
+                    IVA += impuesto.get('total_iva')
+        return IVA or 0.00
 
     @property
     def impuestos(self):
